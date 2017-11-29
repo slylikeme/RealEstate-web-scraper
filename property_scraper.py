@@ -1,4 +1,5 @@
 import requests
+import pandas
 from bs4 import BeautifulSoup
 
 
@@ -8,8 +9,6 @@ initializing a pandas dataframe and writing the information to a .csv file
 """
 
 # TODO:
-# create pandas dataframe
-# write information to .csv file
 # get script to properly crawl through all the results/pages
 # OPTIONAL: loop through individual property links to scrape for more detail
 # OPTIONAL: utilize selenium
@@ -22,40 +21,43 @@ soup = BeautifulSoup(c, "html.parser")
 
 allElem = soup.find_all("div", {"class": "property-card-primary-info"})
 
-allElem[0].find("a", {"class": "listing-price"}).text.replace("\n", "").strip()
-
+dictList = []
 for item in allElem:
+    d = {}
     try:
-        print(item.find("a", {"class": "listing-price"}).text.replace("\n", "").strip())
+        d["Price"] = item.find("a", {"class": "listing-price"}).text.replace("\n", "").strip()
     except:
-        print(None)
+        d["Price"] = None
     try:
-        print(item.find("div", {"class": "property-address"}).text.strip())
+        d["Address"] = item.find("div", {"class": "property-address"}).text.strip()
     except:
-        print(None)
+        d["Address"] = None
     try:
-        print(item.find("div", {"class": "property-city"}).text.strip())
+        d["Locality"] = item.find("div", {"class": "property-city"}).text.strip()
     except:
-        print(None)
+        d["Locality"] = None
     try:
-        print(item.find("div", {"class": "property-sqft"}).find("strong").text)
+        d["Sq. Feet"] = item.find("div", {"class": "property-sqft"}).find("strong").text
     except:
-        print(None)
+        d["Sq. Feet"] = None
     try:
-        print(item.find("div", {"class": "property-beds"}).find("strong").text)
+        d["Beds"] = item.find("div", {"class": "property-beds"}).find("strong").text
     except:
-        print(None)
+        d["Beds"] = None
     try:
-        print(item.find("div", {"class": "property-baths"}).find("strong").text)
+        d["Full Baths"] = item.find("div", {"class": "property-baths"}).find("strong").text
     except:
-        print(None)
+        d["Full Baths"] = None
     try:
-        print(item.find("div", {"class": "property-half-baths"}).find("strong").text)
+        d["Half Baths"] = item.find("div", {"class": "property-half-baths"}).find("strong").text
     except:
-        print(None)
+        d["Half Baths"] = None
     try:
         link = item.find("a", {"class": "listing-price"}).get('href')
-        print(url + 'pdp=' + link[-12:])
+        d["URL"] = url + 'pdp=' + link[-12:]
     except:
-        print(None)
-    print()
+        d["URL"] = None
+    dictList.append(d)
+
+df = pandas.DataFrame(dictList)
+df.to_csv("PropertyInfo.csv")
